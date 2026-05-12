@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en"
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Google Search Console Verification Code -->
+    <meta name="google-site-verification" content="N9PdDg642-Ys-tfx_YcNTWEUkb3OCZNi1HorxWVYO9s" />
+
+    <!-- ================= SEO META TAGS ================= -->
+    <title>Green University of Bangladesh (GUB) | Online Student Portal</title>
+    
+    <meta name="description" content="Welcome to the Green University of Bangladesh (GUB) online portal. Verify your degree certificate, check student results, apply for admission, and access academic notices.">
+    
+    <!-- Keywords that people search on Google -->
+    <meta name="keywords" content="Green University of Bangladesh, GUB, Green University, GUB student portal, GUB degree verification, GUB certificate verify, Green University admission, Private University in Bangladesh, GUB result, GUB notice, Dhaka, Bangladesh">
+    
+    <meta name="author" content="Green University of Bangladesh">
+    <meta name="robots" content="index, follow"> <!-- Google কে সাইট ইনডেক্স করতে বলবে -->
+
+    <!-- Open Graph (Facebook, WhatsApp এ লিংক শেয়ার করলে সুন্দরভাবে ছবি ও টাইটেল দেখাবে) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://greenuniversity-edu-bd.netlify.app/">
+    <meta property="og:title" content="Green University of Bangladesh | Online Portal">
+    <meta property="og:description" content="Official student portal and online degree verification system of Green University of Bangladesh.">
+    <meta property="og:image" content="https://i.postimg.cc/DZRK2pMy/IMG-20260412-183251.jpg">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://greenuniversity-edu-bd.netlify.app/">
+    <!-- ================================================= -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- PDF Download Library (html2pdf) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="https://i.ibb.co.com/rG00jm1F/1519897182833.jpg">
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #ffffff; overflow-x: hidden; }
+        
+        /* GUB Theme Colors */
+        .bg-gub-green { background-color: #0d6e3e; }
+        .text-gub-green { color: #0d6e3e; }
+        .bg-gub-topbar { background-color: #009ca6; }
+        .bg-verify-body { background-color: #ffffff; }
+
+        /* Smooth Section Transitions */
+        .section-view { display: none; animation: fadeIn 0.4s ease; }
+        .section-view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Sticky Right Buttons */
+        .vertical-btn { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); }
+
+        /* Dropdown CSS for Main Menu */
+        .dropdown-menu { display: none; position: absolute; background: white; border-top: 3px solid #0d6e3e; box-shadow: 0 10px 15px rgba(0,0,0,0.1); top: 100%; left: 0; min-width: 220px; z-index: 50; }
+        .group:hover .dropdown-menu { display: block; }
+        .dropdown-item { display: block; padding: 10px 15px; color: #333; font-size: 14px; font-weight: 500; transition: 0.2s; border-bottom: 1px solid #eee; }
+        .dropdown-item:hover { background-color: #f9f9f9; color: #0d6e3e; padding-left: 20px; }
+
+        /* Verification Form & Result Custom CSS */
+        .verify-box { box-shadow: 0 0 20px rgba(0,0,0,0.2); background-color: #eef7eb; border: 1px solid #c3e6cb; }
+        #captchaBox { font-family: 'Courier New', monospace; font-size: 32px; font-weight: bold; color: #5bc0de; background: url('https://i.postimg.cc/k4WvzxkF/noise.png') center; padding: 5px 25px; letter-spacing: 4px; border: 1px solid #ccc; user-select: none; background-color: white; }
+        
+        /* Mobile Menu */
+        #mobileMenu { position: fixed; top: 0; right: -100%; width: 280px; height: 100%; background: white; box-shadow: -5px 0 15px rgba(0,0,0,0.1); z-index: 2000; transition: 0.4s ease; padding-top: 60px; overflow-y: auto; }
+        #mobileMenu.active { right: 0; }
+        .menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 1500; }
+
+        /* Footer links */
+        .footer-list-item { transition: 0.3s; margin-bottom: 8px; }
+        .footer-list-item:hover { color: #fbbf24; padding-left: 5px; }
+
+        /* PDF Printing Custom Background */
+        #resultToPrint { background-color: #ffffff; padding: 15px; border-radius: 5px; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Mobile Menu Overlay -->
+    <div id="overlay" class="menu-overlay" onclick="toggleMobileMenu()"></div>
+
+    <!-- Mobile Sidebar -->
+    <div id="mobileMenu">
+        <button onclick="toggleMobileMenu()" class="absolute top-4 right-4 text-2xl text-gray-600"><i class="fas fa-times"></i></button>
+        <ul class="flex flex-col p-6 space-y-4 font-medium text-gray-700 text-sm">
+            <li class="border-b pb-2 hover:text-gub-green cursor-pointer" onclick="showSection('search'); toggleMobileMenu()"><i class="fas fa-search"></i> Search</li>
+            <li class="border-b pb-2 hover:text-gub-green cursor-pointer" onclick="showSection('verify'); toggleMobileMenu()">Degree Verification</li>
+            <li class="border-b pb-2 hover:text-gub-green"><a href="https://studentportal.green.edu.bd/" target="_blank">Students</a></li>
+            <li class="border-b pb-2 hover:text-gub-green"><a href="https://green.edu.bd/about-us/" target="_blank">About Us</a></li>
+            <li class="border-b pb-2 hover:text-gub-green"><a href="https://green.edu.bd/admissions/" target="_blank">Admission</a></li>
+            <li class="border-b pb-2 hover:text-gub-green"><a href="https://green.edu.bd/academics/" target="_blank">Academics</a></li>
+        </ul>
+    </div>
+
+    <!-- Sticky Right Side Buttons -->
+    <div class="fixed right-0 top-1/3 z-50 flex flex-col gap-2">
+        <a href="https://green.edu.bd/waiver/" target="_blank" class="bg-[#eebb20] text-gray-900 font-bold py-4 px-1.5 rounded-l-md shadow-md hover:pr-4 transition-all flex items-center justify-center text-sm vertical-btn">Waiver</a>
+        <a href="https://admission.green.edu.bd/" target="_blank" class="bg-[#eebb20] text-gray-900 font-bold py-4 px-1.5 rounded-l-md shadow-md hover:pr-4 transition-all flex items-center justify-center text-sm vertical-btn">Online Admission</a>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="bg-gub-topbar text-white text-[13px] hidden lg:block">
+        <div class="max-w-[1400px] mx-auto px-4 flex justify-between items-center py-1">
+            <div class="flex items-center divide-x divide-white/50">
+                <a href="https://studentportal.green.edu.bd/" target="_blank" class="px-3 hover:underline">Students</a>
+                <a href="https://green.edu.bd/admissions/prospective-students/" target="_blank" class="px-3 hover:underline">Prospective Student</a>
+                <a href="https://green.edu.bd/faculty-staff/" target="_blank" class="px-3 hover:underline">Faculty & Staff</a>
+                <a href="https://iqac.green.edu.bd/" target="_blank" class="px-3 hover:underline">IQAC</a>
+                <a href="https://green.edu.bd/sdgs/" target="_blank" class="px-3 hover:underline">SDGs</a>
+                <a href="https://library.green.edu.bd/" target="_blank" class="px-3 hover:underline">Library</a>
+                <a href="https://green.edu.bd/archived-website/" target="_blank" class="px-3 hover:underline">Archived Website</a>
+                <a href="https://green.edu.bd/news/" target="_blank" class="px-3 hover:underline">News</a>
+                <a href="https://green.edu.bd/notice/" target="_blank" class="px-3 hover:underline">Notice</a>
+                <button onclick="showSection('verify')" class="px-3 hover:underline font-bold text-yellow-300">Degree Verification</button>
+            </div>
+            <div class="flex items-center divide-x divide-white/50">
+                <button onclick="showSection('search')" class="px-3 flex items-center gap-1 hover:text-yellow-200 cursor-pointer"><i class="fas fa-search"></i> Search</button>
+                <a href="https://www.facebook.com/greenuniversitybd" target="_blank" class="px-3 hover:text-yellow-200"><i class="fab fa-facebook-f"></i></a>
+                <a href="tel:+8809658499378" class="px-3 hover:text-yellow-200"><i class="fas fa-phone-alt"></i></a>
+                <a href="https://www.youtube.com/channel/greenuniversity" target="_blank" class="px-3 hover:text-yellow-200"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="bg-white shadow-md sticky top-0 z-40 border-b relative">
+        <div class="max-w-[1400px] mx-auto px-4 py-2 flex justify-between items-center">
+            <!-- GUB Logo from Folder -->
+            <a href="#" onclick="showSection('home')">
+                <img src="logo.png" alt="Green University Logo" class="h-12 md:h-16">
+            </a>
+
+            <!-- Desktop Navigation Menu -->
+            <nav class="hidden lg:flex space-x-6 text-[15px] font-bold text-gray-700 tracking-wide pr-10">
+                
+                <div class="group relative py-4">
+                    <a href="https://green.edu.bd/about-us/" target="_blank" class="hover:text-gub-green flex items-center gap-1">About Us <i class="fas fa-chevron-down text-[10px] font-light"></i></a>
+                    <div class="dropdown-menu">
+                        <a href="https://green.edu.bd/about-us/message-from-the-chairperson/" target="_blank" class="dropdown-item">Message from Chairperson</a>
+                        <a href="https://green.edu.bd/about-us/message-from-the-vice-chancellor/" target="_blank" class="dropdown-item">Message from VC</a>
+                        <a href="https://green.edu.bd/about-us/overview/" target="_blank" class="dropdown-item">Overview</a>
+                    </div>
+                </div>
+
+                <div class="group relative py-4">
+                    <a href="https://green.edu.bd/admissions/" target="_blank" class="hover:text-gub-green flex items-center gap-1">Admission <i class="fas fa-chevron-down text-[10px] font-light"></i></a>
+                    <div class="dropdown-menu">
+                        <a href="https://green.edu.bd/admissions/undergraduate-programs/" target="_blank" class="dropdown-item">Undergraduate Programs</a>
+                        <a href="https://green.edu.bd/admissions/graduate-programs/" target="_blank" class="dropdown-item">Graduate Programs</a>
+                        <a href="https://green.edu.bd/admissions/tuition-fees/" target="_blank" class="dropdown-item">Tuition Fees</a>
+                    </div>
+                </div>
+
+                <div class="group relative py-4">
+                    <a href="https://green.edu.bd/academics/" target="_blank" class="hover:text-gub-green flex items-center gap-1">Academics <i class="fas fa-chevron-down text-[10px] font-light"></i></a>
+                    <div class="dropdown-menu">
+                        <a href="https://green.edu.bd/academics/faculties/" target="_blank" class="dropdown-item">Faculties & Departments</a>
+                        <a href="https://green.edu.bd/academics/academic-calendar/" target="_blank" class="dropdown-item">Academic Calendar</a>
+                    </div>
+                </div>
+
+                <div class="group relative py-4">
+                    <a href="https://green.edu.bd/administration/" target="_blank" class="hover:text-gub-green flex items-center gap-1">Administration <i class="fas fa-chevron-down text-[10px] font-light"></i></a>
+                    <div class="dropdown-menu">
+                        <a href="https://green.edu.bd/administration/office-of-the-registrar/" target="_blank" class="dropdown-item">Office of the Registrar</a>
+                        <a href="https://green.edu.bd/administration/office-of-the-controller-of-examinations/" target="_blank" class="dropdown-item">Controller of Examinations</a>
+                    </div>
+                </div>
+
+                <div class="group relative py-4">
+                    <a href="https://green.edu.bd/research/" target="_blank" class="hover:text-gub-green flex items-center gap-1">Research <i class="fas fa-chevron-down text-[10px] font-light"></i></a>
+                    <div class="dropdown-menu">
+                        <a href="https://green.edu.bd/research/publications/" target="_blank" class="dropdown-item">Publications</a>
+                        <a href="https://green.edu.bd/research/centers/" target="_blank" class="dropdown-item">Research Centers</a>
+                    </div>
+                </div>
+
+                <div class="group relative py-4">
+                    <a href="https://green.edu.bd/campus-life/" target="_blank" class="hover:text-gub-green flex items-center gap-1">Campus Life <i class="fas fa-chevron-down text-[10px] font-light"></i></a>
+                    <div class="dropdown-menu">
+                        <a href="https://green.edu.bd/campus-life/clubs/" target="_blank" class="dropdown-item">Clubs & Societies</a>
+                        <a href="https://green.edu.bd/campus-life/facilities/" target="_blank" class="dropdown-item">Facilities</a>
+                    </div>
+                </div>
+
+                <div class="group relative py-4">
+                    <a href="javascript:void(0)" class="hover:text-gub-green flex items-center gap-1">Quick Link <i class="fas fa-chevron-down text-[10px] font-light"></i></a>
+                    <div class="dropdown-menu">
+                        <a href="https://payment.green.edu.bd/" target="_blank" class="dropdown-item">Online Payment</a>
+                        <a href="https://green.edu.bd/careers/" target="_blank" class="dropdown-item">Careers</a>
+                    </div>
+                </div>
+            </nav>
+
+            <i onclick="toggleMobileMenu()" class="fas fa-bars text-gub-green text-2xl cursor-pointer lg:hidden"></i>
+        </div>
+    </header>
+
+    <!-- ================= MAIN CONTENT AREA ================= -->
+    <main class="flex-grow">
+        
+        <!-- 1. HOME SECTION (Slider) -->
+        <section id="section-home" class="section-view active relative w-full overflow-hidden bg-gray-100">
+            <div id="slider" class="flex transition-transform duration-700 ease-in-out w-full h-[250px] sm:h-[350px] md:h-[500px] lg:h-[650px]">
+                <img src="https://i.postimg.cc/0QZZvVGQ/01.png" alt="GUB Slider 1" class="w-full object-cover object-center flex-shrink-0">
+                <img src="https://i.postimg.cc/3R99htj8/02.png" alt="GUB Slider 2" class="w-full object-cover object-center flex-shrink-0">
+                <img src="https://i.postimg.cc/DZ55hxQ0/03.png" alt="GUB Slider 3" class="w-full object-cover object-center flex-shrink-0">
+            </div>
+            <!-- Slider Controls -->
+            <div class="absolute bottom-6 left-10 md:left-24 flex space-x-3" id="dotsContainer">
+                <button class="w-3 h-3 rounded-full bg-white transition-all slider-dot opacity-100" onclick="goToSlide(0)"></button>
+                <button class="w-3 h-3 rounded-full bg-white transition-all slider-dot opacity-50" onclick="goToSlide(1)"></button>
+                <button class="w-3 h-3 rounded-full bg-white transition-all slider-dot opacity-50" onclick="goToSlide(2)"></button>
+            </div>
+            <div class="absolute bottom-6 right-12 md:right-24 flex space-x-4">
+                <button onclick="prevSlide()" class="w-10 h-10 rounded-full border border-white flex items-center justify-center text-white hover:bg-white hover:text-green-700 transition">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button onclick="nextSlide()" class="w-10 h-10 rounded-full border border-white flex items-center justify-center text-white hover:bg-white hover:text-green-700 transition">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- 2. SEARCH SECTION -->
+        <section id="section-search" class="section-view w-full">
+            <div class="relative w-full h-[300px] md:h-[400px]">
+                <img src="https://green.edu.bd/wp-content/uploads/2023/12/campus-view.jpg" class="w-full h-full object-cover" alt="GUB Campus Search">
+                <div class="absolute inset-0 bg-black/30 flex items-end pb-12 pl-10 md:pl-20">
+                    <h1 class="text-white text-5xl md:text-6xl font-bold tracking-wide shadow-lg">Search</h1>
+                </div>
+            </div>
+            <div class="bg-[#dcdde1] w-full py-6 px-4">
+                <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-4 items-center">
+                    <select class="p-3 w-full md:w-48 border text-gray-700 rounded-sm focus:outline-none">
+                        <option>Search Context</option>
+                        <option>All Site</option>
+                        <option>Notice</option>
+                        <option>News</option>
+                    </select>
+                    <input type="text" placeholder="Enter keyword" class="p-3 flex-grow border w-full rounded-sm focus:outline-none text-gray-700">
+                    <button class="bg-[#0d6efd] text-white px-8 py-3 rounded-sm font-semibold hover:bg-blue-700 w-full md:w-auto">Search</button>
+                </div>
+            </div>
+            <div class="max-w-6xl mx-auto py-12 px-4 flex flex-col lg:flex-row gap-10">
+                <div class="lg:w-3/4">
+                    <h2 class="text-3xl font-bold text-[#23809e] border-b-[3px] border-[#23809e] pb-2 mb-6">Search Result</h2>
+                    <p class="text-gray-500 italic mt-10 text-center">Please enter a keyword to start searching.</p>
+                </div>
+                <div class="lg:w-1/4">
+                    <div class="border-[3px] border-[#dc3545]"> 
+                        <div class="bg-[#17a2b8] text-white text-xl font-bold py-3 px-4">Important Links</div>
+                        <ul class="flex flex-col text-[15px] text-gray-700 bg-white">
+                            <!-- Real Links Implemented Here -->
+                            <li class="border-b p-3 hover:text-blue-600"><a href="https://green.edu.bd/news/" target="_blank">News</a></li>
+                            <li class="border-b p-3 hover:text-blue-600"><a href="https://green.edu.bd/notice/" target="_blank">Notice</a></li>
+                            <li class="border-b p-3 hover:text-blue-600"><a href="https://green.edu.bd/faq/" target="_blank">FAQ</a></li>
+                            <li class="border-b p-3 hover:text-blue-600"><a href="https://green.edu.bd/campus-events/" target="_blank">Campus Events</a></li>
+                            <li class="border-b p-3 hover:text-blue-600"><a href="https://green.edu.bd/research-events/" target="_blank">Research Events</a></li>
+                            <li class="border-b p-3 hover:text-blue-600"><a href="https://green.edu.bd/upcoming-events/" target="_blank">Upcoming Events</a></li>
+                            <li class="p-3 hover:text-blue-600"><a href="https://green.edu.bd/sexual-harassment-prevention-committee/" target="_blank">Sexual Harassment Prevention</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. DEGREE VERIFICATION SECTION -->
+        <section id="section-verify" class="section-view w-full pb-20">
+            <!-- Header Container with Green Border -->
+            <div class="max-w-4xl mx-auto border border-[#0d6e3e] p-6 md:p-10 mt-10 mb-8 flex flex-col items-center">
+                <img src="logo.png" alt="GUB Logo" class="h-16 md:h-24 mb-6">
+                <h1 class="text-2xl md:text-[32px] text-[#3c763d] font-medium text-center leading-tight">
+                    Welcome to the Online Degree Verification System
+                </h1>
+            </div>
+
+            <!-- Verification Form Area -->
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="verify-box rounded-md p-4 md:p-6 mb-10">
+                    
+                    <!-- Top Info Label -->
+                    <div class="bg-[#8eb98e] text-gray-800 text-center py-2.5 rounded-md mb-8 font-medium text-[15px] shadow-sm">
+                        Please provide the following information:
+                    </div>
+
+                    <form id="verifyForm" class="space-y-8">
+                        <!-- Inputs Grid -->
+                        <div class="flex flex-col md:flex-row flex-wrap gap-4 items-center justify-center">
+                            <select class="border border-gray-300 p-2.5 rounded-md w-full md:w-[190px] text-[13px] text-gray-700 bg-white" required>
+                                <option value="">-Select Document Type-</option>
+                                <option selected>Degree Certificate</option>
+                                <option>Official Transcript</option>
+                            </select>
+                            
+                            <input type="text" id="inputName" placeholder="Student Name (as per GUB Certificate/Transcript)" class="border border-gray-300 p-2.5 rounded-md w-full md:w-[280px] text-[13px] bg-white" required>
+                            
+                            <input type="text" id="inputId" placeholder="Student Id" class="border border-gray-300 p-2.5 rounded-md w-full md:w-[140px] text-[13px] bg-white" required>
+                            
+                            <span class="text-sm font-bold text-gray-800">OR</span>
+                            
+                            <input type="text" id="inputUid" placeholder="UID" class="border border-gray-300 p-2.5 rounded-md w-full md:w-[140px] text-[13px] bg-white">
+                        </div>
+
+                        <!-- Captcha Section -->
+                        <div class="flex flex-col items-center space-y-6">
+                            <div class="flex items-center gap-4">
+                                <span class="text-sm font-bold text-gray-800">Captcha</span>
+                                <div id="captchaBox" class="shadow-inner">r7aq</div>
+                                <div onclick="generateCaptcha()" class="cursor-pointer text-[#2b6585] text-3xl hover:text-blue-800 transition">
+                                    <i class="fas fa-sync-alt"></i>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col md:flex-row items-center gap-3">
+                                <label class="text-[13px] font-bold text-gray-800">Enter the code shown.</label>
+                                <input type="text" id="inputCaptcha" class="border border-gray-300 p-2 w-[180px] rounded-md text-center bg-white" required>
+                            </div>
+
+                            <!-- Verify Button -->
+                            <div class="pt-2">
+                                <button type="submit" class="bg-[#5bc0de] hover:bg-[#31b0d5] text-white px-10 py-2.5 rounded-md font-medium text-sm tracking-widest shadow-md transition-colors">VERIFY</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Verified Result Box -->
+                <div id="resultSection" class="hidden mt-8">
+                    <div id="resultToPrint">
+                        <div class="verify-box rounded border border-gray-300 p-6 md:p-8">
+                            <div class="flex justify-center mb-4"><img src="logo.png" class="h-12" alt=""></div>
+                            
+                            <h2 class="text-center text-[#222] text-[20px] font-normal mb-6 tracking-wide">Provisional Certificate</h2>
+                            <div class="flex flex-col md:flex-row gap-6 items-stretch justify-center">
+                                <div class="w-full md:w-[55%]">
+                                    <table class="w-full border-collapse bg-transparent text-sm">
+                                        <tr><td class="border-[1.5px] border-black p-2 font-bold w-[30%]">Name</td><td class="border-[1.5px] border-black p-2 bg-white">: <span id="resName" class="ml-1"></span></td></tr>
+                                        <tr><td class="border-[1.5px] border-black p-2 font-bold">Student ID</td><td class="border-[1.5px] border-black p-2 bg-white">: <span id="resId" class="ml-1"></span></td></tr>
+                                        <tr><td class="border-[1.5px] border-black p-2 font-bold">UID</td><td class="border-[1.5px] border-black p-2 bg-white">: <span id="resUid" class="ml-1"></span></td></tr>
+                                        <tr><td class="border-[1.5px] border-black p-2 font-bold">Degree</td><td class="border-[1.5px] border-black p-2 bg-white">: <span id="resDegree" class="ml-1"></span></td></tr>
+                                        <tr><td class="border-[1.5px] border-black p-2 font-bold">CGPA</td><td class="border-[1.5px] border-black p-2 bg-white">: <span id="resCgpa" class="ml-1"></span></td></tr>
+                                        <tr><td class="border-[1.5px] border-black p-2 font-bold">Passing Year</td><td class="border-[1.5px] border-black p-2 bg-white">: <span id="resPassingYear" class="ml-1"></span></td></tr>
+                                    </table>
+                                </div>
+                                <div class="w-full md:w-[45%]">
+                                    <table class="w-full border-collapse text-center text-[11px] bg-white">
+                                        <tr><td colspan="4" class="font-bold py-1 bg-transparent border-0 text-xs text-black pb-2">Grading System of GUB</td></tr>
+                                        <tr class="font-bold text-[10px]"><td class="border border-black p-[3px]">Mark Obtained</td><td class="border border-black p-[3px]">Letter Grade</td><td class="border border-black p-[3px]">Numerical Equivalent</td><td class="border border-black p-[3px]">Definition</td></tr>
+                                        <tr><td class="border border-black p-[3px] font-bold">80% and Above</td><td class="border border-black p-[3px] font-bold">A+</td><td class="border border-black p-[3px] font-bold">4.00</td><td class="border border-black p-[3px] font-bold">Excellent</td></tr>
+                                        <tr><td class="border border-black p-[3px] font-bold">75% &lt; 80%</td><td class="border border-black p-[3px] font-bold">A</td><td class="border border-black p-[3px] font-bold">3.75</td><td class="border border-black p-[3px] font-bold">Excellent</td></tr>
+                                        <tr><td class="border border-black p-[3px] font-bold">70% &lt; 75%</td><td class="border border-black p-[3px] font-bold">A-</td><td class="border border-black p-[3px] font-bold">3.50</td><td class="border border-black p-[3px] font-bold">Very Good</td></tr>
+                                        <tr><td class="border border-black p-[3px] font-bold">65% &lt; 70%</td><td class="border border-black p-[3px] font-bold">B+</td><td class="border border-black p-[3px] font-bold">3.25</td><td class="border border-black p-[3px] font-bold">Good</td></tr>
+                                        <tr><td class="border border-black p-[3px] font-bold">60% &lt; 65%</td><td class="border border-black p-[3px] font-bold">B</td><td class="border border-black p-[3px] font-bold">3.00</td><td class="border border-black p-[3px] font-bold">Good</td></tr>
+                                        <tr><td class="border border-black p-[3px] font-bold">55% &lt; 60%</td><td class="border border-black p-[3px] font-bold">B-</td><td class="border border-black p-[3px] font-bold">2.75</td><td class="border border-black p-[3px] font-bold">Good</td></tr>
+                                        <tr><td class="border border-black p-[3px] font-bold">50% &lt; 55%</td><td class="border border-black p-[3px] font-bold">C+</td><td class="border border-black p-[3px] font-bold">2.50</td><td class="border border-black p-[3px] font-bold">Average</td></tr>
+                                        <tr><td class="border border-black p-[3px] font-bold">45% &lt; 50%</td><td class="border border-black p-[3px] font-bold">C</td><td class="border border-black p-[3px] font-bold">2.25</td><td class="border border-black p-[3px] font-bold">Average</td></tr>
+                                        <tr><td class="border border-black p-[3px] font-bold">40% &lt; 45%</td><td class="border border-black p-[3px] font-bold">D</td><td class="border border-black p-[3px] font-bold">2.00</td><td class="border border-black p-[3px] font-bold">Below Average</td></tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PDF ডাউনলোড বাটন -->
+                    <div class="mt-6 flex justify-center gap-4">
+                        <button onclick="downloadPDF()" class="bg-[#198754] text-white px-6 py-2 rounded shadow hover:bg-green-700 font-bold transition">
+                           <i class="fas fa-download mr-2"></i> Download as PDF
+                        </button>
+                        <p class="text-xs text-gray-500 mt-3">* You can also take a screenshot.</p>
+                    </div>
+                </div>
+
+                <!-- Footer Text -->
+                <div class="mt-12 text-[11px] text-gray-600 font-sans px-2">
+                    <p>Powered by <strong class="text-black">Edusoft Consultants Ltd.</strong></p>
+                    <p>Copyright © 2013 - 2022 Edusoft Consultants Ltd. All rights reserved.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= EXACT FOOTER ================= -->
+    <footer class="bg-gub-green text-white py-12 text-sm mt-auto relative z-10">
+        <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+            
+            <div class="lg:col-span-1">
+                <h3 class="text-lg font-bold mb-6 tracking-wide">Find Us</h3>
+                <div class="flex gap-3 mb-4"><i class="fas fa-map-marker-alt mt-1"></i><p>Purbachal American City, Kanchan, Rupganj, Narayanganj-1461, Dhaka, Bangladesh</p></div>
+                <div class="flex gap-3 mb-4"><i class="fas fa-phone-alt mt-1"></i><div><p>+8809658499378</p></div></div>
+                <div class="flex gap-3"><i class="fas fa-envelope mt-1"></i>
+                    <a href="mailto:designsolutionbd7@gmail.com" class="hover:underline">admission@green.edu.bd</a>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 lg:pl-10">
+                <h3 class="text-lg font-bold mb-6 tracking-wide">Departmental Sites</h3>
+                <ul class="space-y-2">
+                    <li class="footer-list-item"><a href="https://green.edu.bd/academics/faculties/faculty-of-business-studies/department-of-business-administration/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>Business Administration</a></li>
+                    <li class="footer-list-item"><a href="https://green.edu.bd/academics/faculties/faculty-of-science-and-engineering/department-of-computer-science-and-engineering/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>Computer Science And Engineering</a></li>
+                    <li class="footer-list-item"><a href="https://green.edu.bd/academics/faculties/faculty-of-science-and-engineering/department-of-software-engineering/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>Software Engineering</a></li>
+                    <li class="footer-list-item"><a href="https://green.edu.bd/academics/faculties/faculty-of-science-and-engineering/department-of-artificial-intelligence-data-science/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>Artificial Intelligence & Data Science</a></li>
+                    <li class="footer-list-item"><a href="https://green.edu.bd/academics/faculties/faculty-of-science-and-engineering/department-of-electrical-and-electronic-engineering/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>Electrical And Electronic Engineering</a></li>
+                    <li class="footer-list-item"><a href="https://green.edu.bd/academics/faculties/faculty-of-arts-and-social-sciences/department-of-english/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>English</a></li>
+                    <li class="footer-list-item"><a href="https://green.edu.bd/academics/faculties/faculty-of-arts-and-social-sciences/department-of-journalism-and-media-communication/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>Journalism And Media Communication</a></li>
+                    <li class="footer-list-item"><a href="https://green.edu.bd/academics/faculties/faculty-of-law/department-of-law/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>Law</a></li>
+                </ul>
+            </div>
+
+            <div class="lg:col-span-1">
+                <h3 class="text-lg font-bold mb-6 tracking-wide">Useful Links</h3>
+                <ul class="space-y-2">
+                    <li class="footer-list-item"><a href="https://green.edu.bd/convocation/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>Convocation</a></li>
+                    <li class="footer-list-item"><a href="https://green.edu.bd/archived-website/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>Archived Website</a></li>
+                    <li class="footer-list-item"><a href="https://sti.green.edu.bd/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>STI</a></li>
+                    <li class="footer-list-item"><a href="https://itd.green.edu.bd/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>ITD</a></li>
+                    <li class="footer-list-item"><a href="https://green.edu.bd/faq/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>FAQ</a></li>
+                    <li class="footer-list-item"><a href="https://green.edu.bd/forms/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>Forms</a></li>
+                </ul>
+            </div>
+
+            <div class="lg:col-span-1">
+                <h3 class="text-lg font-bold mb-6 tracking-wide">Get in touch</h3>
+                <ul class="space-y-2 mb-8">
+                    <li class="footer-list-item"><a href="https://green.edu.bd/contact-us/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>Contact Us</a></li>
+                    <li class="footer-list-item"><a href="https://green.edu.bd/campus-map/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>Campus Map</a></li>
+                    <li class="footer-list-item"><a href="https://green.edu.bd/photo-gallery/" target="_blank"><i class="fas fa-angle-double-right text-xs mr-2"></i>Photo Gallery</a></li>
+                </ul>
+
+                <h3 class="text-lg font-bold mb-4 tracking-wide">Follow Us</h3>
+                <div class="flex space-x-2">
+                    <a href="https://www.facebook.com/greenuniversitybd" target="_blank" class="border border-white w-8 h-8 flex items-center justify-center hover:bg-white hover:text-gub-green transition"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.youtube.com/channel/greenuniversity" target="_blank" class="border border-white w-8 h-8 flex items-center justify-center hover:bg-white hover:text-gub-green transition"><i class="fab fa-youtube"></i></a>
+                    <a href="https://twitter.com/greenuniversity" target="_blank" class="border border-white w-8 h-8 flex items-center justify-center hover:bg-white hover:text-gub-green transition"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.linkedin.com/school/green-university-of-bangladesh/" target="_blank" class="border border-white w-8 h-8 flex items-center justify-center hover:bg-white hover:text-gub-green transition"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://www.instagram.com/greenuniversitybd/" target="_blank" class="border border-white w-8 h-8 flex items-center justify-center hover:bg-white hover:text-gub-green transition"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="absolute bottom-10 right-10 bg-[#198754] text-white px-3 py-2 rounded shadow-lg hover:bg-green-700">
+            <i class="fas fa-chevron-up"></i>
+        </button>
+    </footer>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            databaseURL: "https://greenuniversity-edu-bd-default-rtdb.firebaseio.com",
+            projectId: "greenuniversity-edu-bd"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let studentDB = [];
+
+        onValue(ref(db, 'students'), (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                studentDB = Object.keys(data).map(key => ({
+                    ...data[key],
+                    firebaseKey: key
+                }));
+            } else {
+                studentDB = [];
+            }
+        });
+
+        window.getStudentData = function(name, id) {
+            return studentDB.find(s => 
+                s.name.toLowerCase() === name.toLowerCase() && 
+                s.id === id &&
+                s.status === 'on'
+            );
+        };
+    </script>
+
+    <script>
+        // Section Switching Logic
+        function showSection(sectionId) {
+            document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+            document.getElementById('section-' + sectionId).classList.add('active');
+            window.scrollTo(0, 0);
+
+            if (sectionId === 'verify') generateCaptcha();
+        }
+
+        // Slider Logic
+        let currentSlide = 0;
+        const totalSlides = 3;
+        function updateSlider() {
+            document.getElementById('slider').style.transform = `translateX(-${currentSlide * 100}%)`;
+            document.querySelectorAll('.slider-dot').forEach((dot, index) => {
+                dot.style.opacity = index === currentSlide ? '1' : '0.5';
+            });
+        }
+        function nextSlide() { currentSlide = (currentSlide + 1) % totalSlides; updateSlider(); }
+        function prevSlide() { currentSlide = (currentSlide - 1 + totalSlides) % totalSlides; updateSlider(); }
+        function goToSlide(idx) { currentSlide = idx; updateSlider(); }
+        setInterval(nextSlide, 5000);
+
+        // Mobile Menu Logic
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('overlay');
+            menu.classList.toggle('active');
+            overlay.style.display = menu.classList.contains('active') ? 'block' : 'none';
+        }
+
+        // Captcha Logic
+        let currentCaptcha = "";
+        function generateCaptcha() {
+            const chars = "abcdefghjkmnpqrstuvwxyz23456789";
+            currentCaptcha = "";
+            for (let i = 0; i < 4; i++) {
+                currentCaptcha += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById("captchaBox").innerText = currentCaptcha;
+            document.getElementById("inputCaptcha").value = "";
+        }
+
+        // Verification Form Submit Logic
+        document.getElementById('verifyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('inputName').value.trim();
+            const id = document.getElementById('inputId').value.trim();
+            const userCaptcha = document.getElementById('inputCaptcha').value.trim();
+
+            if (userCaptcha.toLowerCase() !== currentCaptcha.toLowerCase()) {
+                alert("Incorrect Captcha! Please try again.");
+                generateCaptcha();
+                return;
+            }
+
+            if (typeof getStudentData === "function") {
+                const student = getStudentData(name, id);
+
+                if (student) {
+                    document.getElementById('resName').innerText = student.name;
+                    document.getElementById('resId').innerText = student.id;
+                    document.getElementById('resUid').innerText = student.uid;
+                    document.getElementById('resDegree').innerText = student.degree;
+                    document.getElementById('resCgpa').innerText = student.cgpa;
+                    document.getElementById('resPassingYear').innerText = student.passingYear;
+
+                    document.getElementById('resultSection').style.display = 'block';
+                    document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    alert("Record not found! Please check Name and Student ID carefully or check status.");
+                    generateCaptcha();
+                    document.getElementById('resultSection').style.display = 'none';
+                }
+            }
+        });
+
+        // সংশোধিত PDF ডাউনলোড ফাংশন
+        function downloadPDF() {
+            const element = document.getElementById('resultToPrint');
+            const studentName = document.getElementById('resName').innerText || "Student_Result";
+            
+            const opt = {
+                margin:       10,
+                filename:     `GUB_Result_${studentName}.pdf`,
+                image:        { type: 'jpeg', quality: 1.0 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    scrollY: 0,
+                    letterRendering: true 
+                },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // html2pdf ফাংশন কল
+            html2pdf().from(element).set(opt).save();
+        }
+
+        // Initialize Home on start
+        showSection('home');
+    </script>
+</body>
+</html>

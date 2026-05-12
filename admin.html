@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUB - Admin Control Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .bg-gub-green { background-color: #0d6e3e; }
+        .text-gub-green { color: #0d6e3e; }
+        #loginOverlay { backdrop-filter: blur(8px); }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen pb-20">
+
+    <!-- Simple Login Protection -->
+    <div id="loginOverlay" class="fixed inset-0 bg-black/80 z-[2000] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+            <div class="text-center mb-8">
+                <img src="logo.png" alt="GUB Logo" class="h-12 mx-auto mb-4" onerror="this.src='https://via.placeholder.com/150?text=GUB+LOGO'">
+                <h2 class="text-2xl font-bold text-gray-800">Admin Login</h2>
+                <p class="text-gray-500 text-sm">Authorized Personnel Only</p>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="adminUser" placeholder="Username" class="w-full border p-3 rounded-lg outline-none focus:ring-2 focus:ring-green-600">
+                <input type="password" id="adminPass" placeholder="Password" class="w-full border p-3 rounded-lg outline-none focus:ring-2 focus:ring-green-600">
+                <button onclick="checkLogin()" class="w-full bg-gub-green text-white py-3 rounded-lg font-bold hover:bg-green-800 transition">LOGIN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="adminContent" class="hidden">
+        <header class="bg-gub-green text-white p-4 sticky top-0 z-50 shadow-md">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-user-shield text-xl"></i>
+                    <span class="font-bold tracking-tight uppercase">GUB Records Management</span>
+                </div>
+                <button onclick="logout()" class="text-xs bg-red-600 px-3 py-1.5 rounded-md font-bold">LOGOUT</button>
+            </div>
+        </header>
+
+        <div class="max-w-6xl mx-auto p-4">
+            <!-- Action Bar -->
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 my-6">
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Student Database</h1>
+                    <p class="text-xs text-gray-500">Manage verifiable student credentials</p>
+                </div>
+                <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                    <button onclick="openModal()" class="flex-1 md:flex-none bg-blue-600 text-white px-5 py-2.5 rounded-lg shadow hover:bg-blue-700 transition flex items-center justify-center gap-2 font-bold">
+                        <i class="fas fa-plus"></i> ADD STUDENT
+                    </button>
+                    <button onclick="clearAllDatabase()" class="bg-red-500 text-white px-4 py-2.5 rounded-lg shadow hover:bg-red-700 transition font-bold" title="Wipe Database">
+                        <i class="fas fa-trash-alt mr-1"></i> CLEAR ALL
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search by ID, Name or UID..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-gub-green">
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-100 border-b">
+                            <tr>
+                                <th class="p-4 text-xs font-bold text-gray-600 uppercase">Student Info</th>
+                                <th class="p-4 text-xs font-bold text-gray-600 uppercase hidden md:table-cell">Verify Details</th>
+                                <th class="p-4 text-xs font-bold text-gray-600 uppercase text-center">Status</th>
+                                <th class="p-4 text-xs font-bold text-gray-600 uppercase text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody" class="divide-y divide-gray-100 text-sm">
+                            <!-- Data injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Modal -->
+    <div id="studentModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-[3000]">
+        <div class="bg-white rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl">
+            <div class="bg-gub-green p-5 text-white flex justify-between items-center">
+                <h2 id="modalTitle" class="text-lg font-bold">Add New Student</h2>
+                <button onclick="closeModal()" class="p-2 hover:bg-white/20 rounded-full"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="adminForm" class="p-6 space-y-4">
+                <input type="hidden" id="editKey">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase">Full Name</label>
+                        <input type="text" id="sName" class="w-full border p-2.5 rounded-lg outline-none focus:border-gub-green" required>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase">Student ID (Unique Key)</label>
+                        <input type="text" id="sId" class="w-full border p-2.5 rounded-lg outline-none focus:border-gub-green" required>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase">UID (National/System)</label>
+                        <input type="text" id="sUid" class="w-full border p-2.5 rounded-lg outline-none focus:border-gub-green" required>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase">CGPA</label>
+                        <input type="text" id="sCgpa" class="w-full border p-2.5 rounded-lg outline-none focus:border-gub-green" required>
+                    </div>
+                    <div class="space-y-1 md:col-span-2">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase">Degree Name</label>
+                        <input type="text" id="sDegree" class="w-full border p-2.5 rounded-lg outline-none focus:border-gub-green" required>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase">Passing Year</label>
+                        <input type="text" id="sYear" class="w-full border p-2.5 rounded-lg outline-none focus:border-gub-green" placeholder="e.g., 2024 Spring" required>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase">Visibility Status</label>
+                        <select id="sStatus" class="w-full border p-2.5 rounded-lg outline-none focus:border-gub-green font-bold">
+                            <option value="on" class="text-green-600">ON (Visible)</option>
+                            <option value="off" class="text-red-600">OFF (Hidden)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-gub-green text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-green-800 transition uppercase tracking-wider">Save Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase Implementation -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // CONFIGURATION
+        const firebaseConfig = {
+            databaseURL: "https://greenuniversity-edu-bd-default-rtdb.firebaseio.com",
+            projectId: "greenuniversity-edu-bd"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const tableBody = document.getElementById('adminTableBody');
+
+        // 1. CLEAR DATABASE FUNCTION
+        window.clearAllDatabase = () => {
+            Swal.fire({
+                title: 'DANGER ZONE!',
+                text: "This will PERMANENTLY DELETE all student records from the database.",
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'YES, DELETE EVERYTHING'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    remove(ref(db, 'students'))
+                    .then(() => {
+                        Swal.fire('Wiped!', 'Database is now empty.', 'success');
+                    });
+                }
+            });
+        };
+
+        // 2. FETCH AND DISPLAY (Real-time)
+        onValue(ref(db, 'students'), (snapshot) => {
+            tableBody.innerHTML = '';
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                const sortedKeys = Object.keys(data).sort((a, b) => data[a].name.localeCompare(data[b].name));
+                
+                sortedKeys.forEach(idKey => {
+                    const s = data[idKey];
+                    tableBody.innerHTML += `
+                        <tr class="hover:bg-gray-50 transition border-b border-gray-50">
+                            <td class="p-4">
+                                <div class="font-bold text-gray-800">${s.name}</div>
+                                <div class="text-[11px] text-gub-green font-medium">${s.degree}</div>
+                                <div class="text-[10px] text-gray-400 md:hidden mt-1">ID: ${s.id} | UID: ${s.uid}</div>
+                            </td>
+                            <td class="p-4 hidden md:table-cell">
+                                <div class="text-xs font-mono text-gray-600">ID: ${s.id}</div>
+                                <div class="text-[10px] text-gray-400 uppercase tracking-widest">UID: ${s.uid}</div>
+                                <div class="text-[10px] text-blue-600 mt-1 font-bold">CGPA: ${s.cgpa}</div>
+                            </td>
+                            <td class="p-4 text-center">
+                                <span class="px-2 py-1 rounded-md text-[10px] font-bold ${s.status === 'on' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                                    ${s.status.toUpperCase()}
+                                </span>
+                            </td>
+                            <td class="p-4 text-right space-x-1">
+                                <button onclick="editData('${s.id}')" class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"><i class="fas fa-edit"></i></button>
+                                <button onclick="deleteData('${s.id}')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>`;
+                });
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-400">Database empty. No records found.</td></tr>';
+            }
+        });
+
+        // 3. SAVE DATA (FIXED UPDATE LOGIC)
+        document.getElementById('adminForm').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const studentId = document.getElementById('sId').value.trim();
+            const originalId = document.getElementById('editKey').value.trim();
+
+            if(!studentId) return Swal.fire('Error', 'Student ID is required', 'error');
+
+            const data = {
+                name: document.getElementById('sName').value.trim(),
+                id: studentId,
+                uid: document.getElementById('sUid').value.trim(),
+                degree: document.getElementById('sDegree').value.trim(),
+                cgpa: document.getElementById('sCgpa').value.trim(),
+                passingYear: document.getElementById('sYear').value.trim(),
+                status: document.getElementById('sStatus').value
+            };
+
+            try {
+                // যদি এডিট করার সময় আইডি পরিবর্তন করা হয়, তবে পুরানো আইডি মুছে ফেলতে হবে
+                if (originalId && originalId !== studentId) {
+                    await remove(ref(db, 'students/' + originalId));
+                }
+
+                // সরাসরি নতুন ডাটা সেট করা (আইডি সেম থাকলে ওভাররাইট হবে)
+                await set(ref(db, 'students/' + studentId), data);
+                
+                closeModal();
+                Swal.fire({ icon: 'success', title: 'Data Saved', text: 'Record updated successfully!', timer: 1500 });
+            } catch (err) {
+                Swal.fire('Database Error', err.message, 'error');
+            }
+        };
+
+        // 4. DELETE SINGLE RECORD
+        window.deleteData = (id) => {
+            Swal.fire({
+                title: 'Delete record?',
+                text: `Removing student ID: ${id}`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Yes, remove it'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    remove(ref(db, 'students/' + id));
+                }
+            });
+        };
+
+        // 5. PRE-FILL EDIT FORM (FIXED FETCH)
+        window.editData = (id) => {
+            const studentRef = ref(db, 'students/' + id);
+            get(studentRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const s = snapshot.val();
+                    document.getElementById('editKey').value = id;
+                    document.getElementById('sName').value = s.name || '';
+                    document.getElementById('sId').value = s.id || '';
+                    document.getElementById('sUid').value = s.uid || '';
+                    document.getElementById('sDegree').value = s.degree || '';
+                    document.getElementById('sCgpa').value = s.cgpa || '';
+                    document.getElementById('sYear').value = s.passingYear || '';
+                    document.getElementById('sStatus').value = s.status || 'on';
+                    
+                    document.getElementById('modalTitle').innerText = "Edit Student Record";
+                    openModal();
+                }
+            }).catch((error) => {
+                Swal.fire('Error', 'Could not fetch data', 'error');
+            });
+        };
+    </script>
+
+    <script>
+        // UI HELPERS
+        function checkLogin() {
+            const u = document.getElementById('adminUser').value;
+            const p = document.getElementById('adminPass').value;
+            if(u === 'admin' && p === 'gub@admin2024') {
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('adminContent').classList.remove('hidden');
+                localStorage.setItem('gubAdminLogged', 'true');
+            } else {
+                Swal.fire('Access Denied', 'Invalid Credentials', 'error');
+            }
+        }
+
+        if(localStorage.getItem('gubAdminLogged') === 'true') {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('adminContent').classList.remove('hidden');
+        }
+
+        function logout() {
+            localStorage.removeItem('gubAdminLogged');
+            location.reload();
+        }
+
+        function openModal() {
+            document.getElementById('studentModal').classList.replace('hidden', 'flex');
+        }
+
+        function closeModal() {
+            document.getElementById('studentModal').classList.replace('flex', 'hidden');
+            document.getElementById('adminForm').reset();
+            document.getElementById('editKey').value = "";
+            document.getElementById('modalTitle').innerText = "Add New Student";
+        }
+
+        function filterTable() {
+            const input = document.getElementById("searchInput").value.toUpperCase();
+            const rows = document.getElementById("adminTableBody").getElementsByTagName("tr");
+            for (let i = 0; i < rows.length; i++) {
+                const text = rows[i].textContent || rows[i].innerText;
+                rows[i].style.display = text.toUpperCase().indexOf(input) > -1 ? "" : "none";
+            }
+        }
+    </script>
+</body>
+</html>
